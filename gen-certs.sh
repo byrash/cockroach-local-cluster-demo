@@ -14,7 +14,7 @@ cp ./certs/ca.crt ./certs/node2/ca.crt
 cp ./certs/ca.crt ./certs/node3/ca.crt
 
 cockroach cert create-node \
-    roach_node_1 \
+    roach1 \
     localhost \
     127.0.0.1 \
     --certs-dir=./certs/node1 \
@@ -22,7 +22,7 @@ cockroach cert create-node \
     --overwrite
 
 cockroach cert create-node \
-    roach_node_2 \
+    roach2 \
     localhost \
     127.0.0.1 \
     --certs-dir=./certs/node2 \
@@ -30,7 +30,7 @@ cockroach cert create-node \
     --overwrite
 
 cockroach cert create-node \
-    roach_node_3 \
+    roach3 \
     localhost \
     127.0.0.1 \
     --certs-dir=./certs/node3 \
@@ -42,3 +42,6 @@ cockroach cert create-client \
     --certs-dir=./certs \
     --ca-key=./certs/ca.key \
     --overwrite
+
+cp ./certs/client.root.crt ./certs/node1/client.root.crt
+cp ./certs/client.root.key ./certs/node1/client.root.key

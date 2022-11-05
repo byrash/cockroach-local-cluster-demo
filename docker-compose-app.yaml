@@ -1,0 +1,23 @@
+version: '3.9'
+services:
+    app1:
+        container_name: app1
+        hostname: app1
+        build: .
+        expose:
+            - '9090'
+        ports:
+            - '9090:9090'
+        environment:
+            - DB_HOST_NAME=host.docker.internal
+            - DB_PORT=26257
+            - DB_NAME=defaultdb
+            - DB_USER=root
+            - DB_PWD=welcome123
+            - APP_LISTEN_PORT=9090
+        networks:
+            - appnet
+        command: ./app
+
+networks:
+    appnet:
