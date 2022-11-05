@@ -40,3 +40,7 @@ Run schema.sql content in the same shell as above
 root/welcome123
 
 ** Connect to your favorite SQL ediot using ca cert and user name and password above **
+
+## Tail app logs
+
+`docker-compose -f docker-compose-app.yaml logs --tail=0 --follow`
