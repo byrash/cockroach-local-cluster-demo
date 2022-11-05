@@ -8,7 +8,6 @@ services:
             - '26257'
         ports:
             - '8080:8080'
-            - '26257:26257'
         volumes:
             - ./certs/node1:/cockroach/certs:r
             - ./data/node1:/cockroach/cockroach-data
@@ -44,5 +43,16 @@ services:
             - roachnet
         command: start --join=roach1,roach2,roach3 --certs-dir=certs
         # command: start --logtostderr --join=roach1,roach2,roach3 --certs-dir=certs
+
+    db_lb:
+        container_name: db_lb
+        hostname: db_lb
+        image: envoyproxy/envoy-dev:e0cc4306253f0318f9dcbc77cf32feb6245c378f
+        ports:
+            - '9292:9292'
+        volumes:
+            - ./envoy-db.yaml:/etc/envoy/envoy.yaml
+        networks:
+            - roachnet
 networks:
     roachnet:

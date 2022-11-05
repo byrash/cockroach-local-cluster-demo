@@ -1,0 +1,38 @@
+static_resources:
+  listeners:
+    - name: listener_0
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 9292
+      filter_chains:
+        - filters:
+            - name: envoy.filters.network.tcp_proxy
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.tcp_proxy.v3.TcpProxy
+                stat_prefix: destination
+                cluster: db_cluster
+  clusters:
+    - name: db_cluster
+      connect_timeout: 30s
+      type: strict_dns
+      dns_lookup_family: V4_ONLY
+      load_assignment:
+        cluster_name: db_cluster
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: roach1
+                      port_value: 26257
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: roach2
+                      port_value: 26257
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: roach3
+                      port_value: 26257
