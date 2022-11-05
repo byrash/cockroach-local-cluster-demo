@@ -37,6 +37,7 @@ func init() {
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
 	appListenPort := os.Getenv("APP_LISTEN_PORT")
+	appName := os.Getenv("APP_NAME")
 
 	defer db.Close()
 
@@ -48,7 +49,7 @@ func main() {
 		// 	http.Error(w, err.Error(), http.StatusInternalServerError)
 		// 	return
 		// }
-		w.Write([]byte(""))
+		w.Write([]byte("Hello, Boss!!! from " + appName))
 	})
 	http.ListenAndServe(":"+appListenPort, r)
 }

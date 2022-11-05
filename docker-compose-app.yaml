@@ -6,8 +6,6 @@ services:
         build: .
         expose:
             - '9090'
-        ports:
-            - '9090:9090'
         environment:
             - DB_HOST_NAME=host.docker.internal
             - DB_PORT=26257
@@ -15,6 +13,7 @@ services:
             - DB_USER=root
             - DB_PWD=welcome123
             - APP_LISTEN_PORT=9090
+            - APP_NAME=app_node_1
         networks:
             - appnet
         command: ./app
@@ -24,8 +23,6 @@ services:
         build: .
         expose:
             - '9090'
-        ports:
-            - '9091:9090'
         environment:
             - DB_HOST_NAME=host.docker.internal
             - DB_PORT=26257
@@ -33,6 +30,7 @@ services:
             - DB_USER=root
             - DB_PWD=welcome123
             - APP_LISTEN_PORT=9090
+            - APP_NAME=app_node_2
         networks:
             - appnet
         command: ./app
@@ -42,8 +40,6 @@ services:
         build: .
         expose:
             - '9090'
-        ports:
-            - '9092:9090'
         environment:
             - DB_HOST_NAME=host.docker.internal
             - DB_PORT=26257
@@ -51,9 +47,20 @@ services:
             - DB_USER=root
             - DB_PWD=welcome123
             - APP_LISTEN_PORT=9090
+            - APP_NAME=app_node_3
         networks:
             - appnet
         command: ./app
 
+    envoy:
+        container_name: envoy
+        hostname: envoy
+        image: envoyproxy/envoy-dev:e0cc4306253f0318f9dcbc77cf32feb6245c378f
+        ports:
+            - '9191:9191'
+        volumes:
+            - ./envoy.yaml:/etc/envoy/envoy.yaml
+        networks:
+            - appnet
 networks:
     appnet:
