@@ -29,6 +29,8 @@ docker exec -it roach1 ./cockroach sql --certs-dir=certs
 alter user root password 'welcome123';
 ```
 
+Run schema.sql content in the same shell as above
+
 ## Login to console
 
 [console URL](https://localhost:8080/#/overview/list)

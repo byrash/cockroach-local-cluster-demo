@@ -1,12 +1,15 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 
+	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 
 	"github.com/go-chi/chi/v5"
@@ -34,6 +37,54 @@ func init() {
 	log.Println("Successfully connected to DB!")
 }
 
+var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+func randSeq(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
+}
+
+func doDBOperation(ctx context.Context) error {
+	log.SetPrefix(fmt.Sprintf("%s ", ctx.Value("x-request-id")))
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		log.Println(err.Error())
+		return err
+	}
+	parentID := 0
+	createParent := fmt.Sprintf("INSERT INTO parent(name) VALUES ('%s') RETURNING id", randSeq(10))
+	err = db.QueryRowContext(ctx, createParent).Scan(&parentID)
+	if err != nil {
+		log.Println(err.Error())
+		err = tx.Rollback()
+		if err != nil {
+			log.Println(err.Error())
+		}
+		return err
+	}
+	childID := 0
+	createChild := fmt.Sprintf("INSERT INTO child(name, parent_id) VALUES ('%s', %v) RETURNING id", randSeq(10), parentID)
+	err = db.QueryRowContext(ctx, createChild).Scan(&childID)
+	if err != nil {
+		log.Println(err.Error())
+		err = tx.Rollback()
+		if err != nil {
+			log.Println(err.Error())
+		}
+		return err
+	}
+	err = tx.Commit()
+	if err != nil {
+		log.Println(err.Error())
+		return err
+	}
+	log.Printf("Inserted Parent [%d] and Child [%d]\n", parentID, childID)
+	return nil
+}
+
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
 	appListenPort := os.Getenv("APP_LISTEN_PORT")
@@ -43,12 +94,12 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Post("/", func(w http.ResponseWriter, r *http.Request) {
-		// ctx := context.WithValue(r.Context(), "x-request-id", uuid.New().String())
-		// err := doDBOperation(ctx)
-		// if err != nil {
-		// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-		// 	return
-		// }
+		ctx := context.WithValue(r.Context(), "x-request-id", uuid.New().String())
+		err := doDBOperation(ctx)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		w.Write([]byte("Hello, Boss!!! from " + appName))
 	})
 	http.ListenAndServe(":"+appListenPort, r)
